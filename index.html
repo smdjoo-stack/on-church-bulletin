@@ -82,6 +82,11 @@
     font-size:14.5px; color:var(--ink-soft); font-weight:300;
   }
   .order .songs .mk{ font-family:var(--display); font-size:15px; color:var(--accent-soft); min-width:16px; }
+  .order .songs li[data-img]{ cursor:pointer; }
+  .order .songs li[data-img] span:not(.mk){
+    text-decoration:underline; text-decoration-style:dotted; text-underline-offset:3px;
+    text-decoration-color:var(--accent-soft);
+  }
   .order .reading{
     margin-top:10px; padding:14px 16px; background:var(--cream); border-radius:12px;
     font-size:14.5px; line-height:1.95; color:var(--ink-soft); font-weight:300;
@@ -273,6 +278,27 @@
     color:var(--ink-soft); text-decoration:none; font-size:14px; text-align:center;
   }
   .archive-list a:hover{ background:#EAE0CC; color:var(--accent); }
+
+  /* 이미지 보기 모달 (찬양 악보/가사 이미지 등 범용) */
+  .img-modal-overlay{
+    position:fixed; top:0; left:0; width:100%; height:100%;
+    background:rgba(43,38,32,.85); z-index:100000;
+    display:none; align-items:center; justify-content:center;
+    opacity:0; transition:opacity .2s ease;
+  }
+  .img-modal-overlay.active{ display:flex; opacity:1; }
+  .img-modal-content{
+    position:relative; width:90%; max-width:460px; max-height:85vh;
+    background:var(--paper); border-radius:16px; padding:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,.3);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .img-modal-content img{ max-width:100%; max-height:calc(85vh - 32px); border-radius:8px; }
+  .img-modal-close{
+    position:absolute; top:-14px; right:-14px; width:32px; height:32px;
+    border-radius:50%; border:0; background:var(--ink); color:#fff;
+    font-size:18px; line-height:1; cursor:pointer;
+  }
 </style>
 </head>
 <body>
@@ -281,6 +307,13 @@
   </div>
   <div class="archive-heading" id="archive-heading" style="display:none;">지난 주보 보기</div>
   <ul class="archive-list" id="archive-list"></ul>
+
+  <div class="img-modal-overlay" id="img-modal">
+    <div class="img-modal-content">
+      <button type="button" class="img-modal-close" id="img-modal-close">&times;</button>
+      <img id="img-modal-img" src="" alt="">
+    </div>
+  </div>
 
 <script>
 (function() {
@@ -325,6 +358,28 @@
     if (img) img.src = images[idx];
     if (indicator) indicator.textContent = (idx + 1) + ' / ' + images.length + ' (클릭하면 다음 장)';
   });
+
+  // 이미지 보기 모달 — 찬양곡 등 [data-img] 속성이 붙은 요소를 클릭하면 그 이미지를 크게 보여준다.
+  (function() {
+    var modal = document.getElementById('img-modal');
+    var modalImg = document.getElementById('img-modal-img');
+
+    function closeModal() { modal.classList.remove('active'); }
+
+    document.addEventListener('click', function(e) {
+      var trigger = e.target.closest('[data-img]');
+      if (trigger) {
+        modalImg.src = trigger.getAttribute('data-img');
+        modalImg.alt = trigger.textContent.trim();
+        modal.classList.add('active');
+        return;
+      }
+      if (e.target === modal || e.target.id === 'img-modal-close') closeModal();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
+  })();
 
   fetch('latest.json', { cache: 'no-store' })
     .then(function(r) { return r.json(); })
