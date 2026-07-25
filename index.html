@@ -387,7 +387,7 @@
     .catch(function(err) { console.error('[bulletin] latest.json load failed:', err); });
 
   // 최근 8개까지만 표시. 그 이상은 archive.json에는 남아있지만 목록엔 안 뜬다.
-  var ARCHIVE_LIMIT = 8;
+  var ARCHIVE_LIMIT = 4;
 
   fetch('archive.json', { cache: 'no-store' })
     .then(function(r) { return r.json(); })
